@@ -1,19 +1,32 @@
+import sys
+
 import random as r
 import numpy as np
 
-# we could get function type and dimension from command line arguments
 # will need to think about how I design the toplogy
 # maybe just as a list of the particles closest to each other?
 
+# Template of how to supply command line arguments
+# sys.arv = ['pso.py', function_type, dimension]
+# note that function type is 'rosenbrock' or 'griewanks' and dimension is an optional integer argument
+
 NUM_GENS = 100
 NUM_PARTICLES = 100
-DIMENSION = 5 # obviously will be changed
+DIMENSION = 20
+if len(sys.argv) > 2 && type(sys.argv[2]) == 'int' && sys.argv[2] > 0: # line that allows user to supply dimension as a command line argument
+	DIMENSION = sys.argv[2]
 
 # we are looking to minimise the function so we set our starting values to ∞
 gbest = float('inf')
 gbest_position = np.zeros(DIMENSION)
 
-function = (lambda x: x) # obviously this will be changed # will need to take a numpy array
+def rosenbrock_function(position):
+	output = 0
+
+	for i in range(DIMENSION-1):
+		output += (100 * ((position[i]**2) - (position[i+1]**2)) + ((position[i] - 1)**2))
+
+	return output
 
 class Particle:
 	# maybe make the initial positions and velocitys an input to the class
