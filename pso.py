@@ -21,6 +21,10 @@ if len(sys.argv) > 2 and type(sys.argv[2]) == 'int' and sys.argv[2] > 0:
 gbest = float('inf')
 gbest_position = np.zeros(DIMENSION)
 
+w = 0.7298 # can linearly decrease this with generations later if I want
+c1 = 1.49681 # acceleration coefficient
+c2 = 1.49681 # acceleration coefficient
+
 def rosenbrock_function(position):
 	output = 0
 
@@ -28,6 +32,8 @@ def rosenbrock_function(position):
 		output += (100 * ((position[i]**2) - (position[i+1]**2)) + ((position[i] - 1)**2))
 
 	return output
+
+function = rosenbrock_function
 
 class Particle:
 	# maybe make the initial positions and velocitys an input to the class
@@ -37,33 +43,34 @@ class Particle:
 	pbest = float('inf')
 	pbest_position = np.zeros(DIMENSION)
 	
-	w = 0.7298 # can linearly decrease this with generations later if I want
-	c1 = 1.49681 # acceleration coefficient
-	c2 = 1.49681 # acceleration coefficient
-	
-	current_velocity = np.zeros(DIMENSION)
-	current_position = np.zeros(DIMENSION)
+	current_velocity = np.ones(DIMENSION)
+	current_position = np.ones(DIMENSION)
 
-	def calculate_new_velocity():
-		return current_velocity + (c1 * r.random() * (np.subtract(pbest_position, current_position))) + (c2 * r.random() * np.subtract(gbest_position, current_position))
+	def calculate_new_velocity(self):
+		return self.current_velocity + (c1 * r.random() * (np.subtract(self.pbest_position, self.current_position))) + (c2 * r.random() * np.subtract(gbest_position, self.current_position))
 
-	def update_position(updated_velocity):
-		current_position = current_position + updated_velocity
+	def update_position(self, updated_velocity):
+		self.current_position = self.current_position + updated_velocity
+
+		output = function(self.current_position)
 
 		# check how good the new position is relative to personal best
-		if function(current_position) > pbest:
-			pbest_position = current_position
+		if output < self.pbest:
+			self.pbest_position = self.current_position
+			self.pbest = output
 		
 		# check how good the new position is relative to global best
-		if function(current_position) > gbest:
-			gbest_position = current_position
+		global gbest
+		if output < gbest:
+			gbest_position = self.current_position
+			gbest = output
 
-	def update():
+	def update(self):
 		updated_velocity = self.calculate_new_velocity()
-		current_velocity = updated_velocity
-		update_position(updated_velocity)
+		self.current_velocity = updated_velocity
+		self.update_position(updated_velocity)
 
-if __name__ == 'main':
+if __name__ == '__main__':
 	# choose number of particles
 	# choose number of generations
 
