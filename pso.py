@@ -37,7 +37,7 @@ def rosenbrock_function(position):
 def protected_div(a, b):
 	if b != 0:
 		return a/b
-	return 0
+	return float()
 
 def griewanks_function(position):
 	A = 0
