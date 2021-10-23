@@ -1,5 +1,5 @@
 import sys
-
+import math
 import random as r
 import numpy as np
 
@@ -8,22 +8,23 @@ import numpy as np
 
 # Template of how to supply command line arguments
 # sys.arv = ['pso.py', function_type, dimension]
-# note that function type is 'rosenbrock' or 'griewanks' and dimension is an optional integer argument
+# note that function type is 'rosenbrock' or 'griewanks' and dimension is an optional positive integer argument
+
+w = 0.7298 # can linearly decrease this with generations later if I want
+c1 = 1.49681 # acceleration coefficient
+c2 = 1.49681 # acceleration coefficient
 
 NUM_GENS = 100
 NUM_PARTICLES = 100
 DIMENSION = 20
+
 # line that allows user to supply dimension as a command line argument
-if len(sys.argv) > 2 and type(sys.argv[2]) == 'int' and sys.argv[2] > 0:
+if len(sys.argv) > 2 and type(sys.argv[2]) == 'int' and sys.argv[2] > 0: # needs to be tested
 	DIMENSION = sys.argv[2]
 
 # we are looking to minimise the function so we set our starting values to ∞
 gbest = float('inf')
 gbest_position = np.zeros(DIMENSION)
-
-w = 0.7298 # can linearly decrease this with generations later if I want
-c1 = 1.49681 # acceleration coefficient
-c2 = 1.49681 # acceleration coefficient
 
 def rosenbrock_function(position):
 	output = 0
@@ -33,7 +34,34 @@ def rosenbrock_function(position):
 
 	return output
 
-function = rosenbrock_function
+def protected_div(a, b):
+	if b != 0:
+		return a/b
+	return 0
+
+def griewanks_function(position):
+	A = 0
+	B = 1
+
+	for i in range(DIMENSION):
+		A += ((position[i])**2/4000)
+
+	for i in range(DIMENSION):
+		B *= math.cos(protected_div((position[i]), math.sqrt(i)))+1
+
+	return A - B
+
+if len(sys.argv) > 1:
+	if sys.argv[1] == 'rosenbrock':
+		function = rosenbrock_function
+	elif sys.argv[1] == 'griewanks':
+		function = griewanks_function
+	else:
+		print("Function type specified not recognised. Default of Rosenbrock's function chosen.")
+		function = rosenbrock_function
+else:
+	print("Function type not supplied as command line argument. Default of Rosenbrock's function chosen.")
+	function = rosenbrock_function	
 
 class Particle:
 	# maybe make the initial positions and velocitys an input to the class
@@ -60,7 +88,7 @@ class Particle:
 			self.pbest = output
 		
 		# check how good the new position is relative to global best
-		global gbest
+		global gbest, gbest_position
 		if output < gbest:
 			gbest_position = self.current_position
 			gbest = output
@@ -71,9 +99,6 @@ class Particle:
 		self.update_position(updated_velocity)
 
 if __name__ == '__main__':
-	# choose number of particles
-	# choose number of generations
-
 	particle_list = list()
 
 	for i in range(NUM_PARTICLES):
@@ -84,3 +109,4 @@ if __name__ == '__main__':
 			particle.update()
 
 	print(gbest)
+	print(gbest_position)
