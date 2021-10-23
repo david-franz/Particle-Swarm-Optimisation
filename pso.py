@@ -13,7 +13,8 @@ import numpy as np
 NUM_GENS = 100
 NUM_PARTICLES = 100
 DIMENSION = 20
-if len(sys.argv) > 2 && type(sys.argv[2]) == 'int' && sys.argv[2] > 0: # line that allows user to supply dimension as a command line argument
+# line that allows user to supply dimension as a command line argument
+if len(sys.argv) > 2 and type(sys.argv[2]) == 'int' and sys.argv[2] > 0:
 	DIMENSION = sys.argv[2]
 
 # we are looking to minimise the function so we set our starting values to ∞
@@ -44,7 +45,7 @@ class Particle:
 	current_position = np.zeros(DIMENSION)
 
 	def calculate_new_velocity():
-		return current_velocity + (c1 * r1 = r.random() * (pbest_position - current_position)) + (c2 * r2 = r.random() * (gbest_position - current_position))
+		return current_velocity + (c1 * r.random() * (np.subtract(pbest_position, current_position))) + (c2 * r.random() * np.subtract(gbest_position, current_position))
 
 	def update_position(updated_velocity):
 		current_position = current_position + updated_velocity
