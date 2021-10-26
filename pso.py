@@ -6,16 +6,18 @@ import numpy as np
 # will need to think about how I design the toplogy
 # maybe just as a list of the particles closest to each other?
 
+# could easily just iterate over the list, calculate the closest particle to each particle and then work out topology from there
+# eg: ring topology would be two closest particles
+
 # Template of how to supply command line arguments
 # sys.arv = ['pso.py', function_type, dimension]
 # note that function type is 'rosenbrock' or 'griewanks' and dimension is an optional positive integer argument
 
-w = 0.7298 # can linearly decrease this with generations later if I want
 c1 = 1.49681 # acceleration coefficient
 c2 = 1.49681 # acceleration coefficient
 
-NUM_GENS = 100
-NUM_PARTICLES = 100
+NUM_GENS = 500
+NUM_PARTICLES = 500
 DIMENSION = 20
 
 # line that allows user to supply dimension as a command line argument
@@ -24,7 +26,7 @@ if len(sys.argv) > 2 and type(sys.argv[2]) == 'int' and sys.argv[2] > 0: # needs
 
 # we are looking to minimise the function so we set our starting values to ∞
 gbest = float('inf')
-gbest_position = np.zeros(DIMENSION)
+gbest_position = np.array([r.random() for i in range(DIMENSION)])
 
 def rosenbrock_function(position):
 	output = 0
@@ -69,16 +71,20 @@ class Particle:
 
 	# we are looking to minimise the function so we set our starting values to ∞
 	pbest = float('inf')
-	pbest_position = np.zeros(DIMENSION)
-	
-	current_velocity = np.ones(DIMENSION)
-	current_position = np.ones(DIMENSION)
+
+	w = 0.9 # w = 0.01 for griewanks
+
+	def __init__(self):
+		self.pbest_position = np.array([r.random() for i in range(DIMENSION)]) #np.ones(DIMENSION)
+		self.current_velocity = np.array([r.random() for i in range(DIMENSION)])
+		self.current_position = np.array([r.randint(-29,29) for i in range(DIMENSION)])
 
 	def calculate_new_velocity(self):
-		return self.current_velocity + (c1 * r.random() * (np.subtract(self.pbest_position, self.current_position))) + (c2 * r.random() * np.subtract(gbest_position, self.current_position))
+		self.w -= ((0.9-0.4)/NUM_GENS) # linearly decrease value
+		return (self.w * self.current_velocity) + (c1 * r.random() * (np.subtract(self.pbest_position, self.current_position))) + (c2 * r.random() * np.subtract(gbest_position, self.current_position))
 
 	def update_position(self, updated_velocity):
-		self.current_position = self.current_position + updated_velocity
+		self.current_position = np.array([p if (-30 <= p and p <= 30) else (math.copysign(1, p) * 30) for p in np.add(self.current_position, updated_velocity)])
 
 		output = function(self.current_position)
 
@@ -109,4 +115,4 @@ if __name__ == '__main__':
 			particle.update()
 
 	print(gbest)
-	print(gbest_position)
+	print(list(gbest_position))
