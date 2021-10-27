@@ -1,5 +1,7 @@
 import sys
+import time
 import math
+import statistics
 import random as r
 import numpy as np
 
@@ -63,7 +65,7 @@ if len(sys.argv) > 1:
 		function = rosenbrock_function
 else:
 	print("Function type not supplied as command line argument. Default of Rosenbrock's function chosen.")
-	function = rosenbrock_function	
+	function = rosenbrock_function
 
 class Particle:
 	# maybe make the initial positions and velocitys an input to the class
@@ -72,7 +74,7 @@ class Particle:
 	# we are looking to minimise the function so we set our starting values to ∞
 	pbest = float('inf')
 
-	w = 0.9 # w = 0.01 for griewanks
+	w = 0.9
 
 	def __init__(self):
 		self.pbest_position = np.array([r.random() for i in range(DIMENSION)]) #np.ones(DIMENSION)
@@ -105,14 +107,29 @@ class Particle:
 		self.update_position(updated_velocity)
 
 if __name__ == '__main__':
-	particle_list = list()
+	run_bests = list()
 
-	for i in range(NUM_PARTICLES):
-		particle_list.append(Particle()) # make the velocity and position here
+	t0 = time.time()
 
-	for gen in range(NUM_GENS):
-		for particle in particle_list:
-			particle.update()
+	for run in range(30): #30 runs
+		print("#######")
+		print("run {}".format(run+1))
+		particle_list = list()
 
-	print(gbest)
-	print(list(gbest_position))
+		for i in range(NUM_PARTICLES):
+			particle_list.append(Particle()) # make the velocity and position here
+
+		for gen in range(NUM_GENS):
+			for particle in particle_list:
+				particle.update()
+
+		run_bests.append(gbest)
+		
+		print("best x = {}".format(list(gbest_position)))
+		print("best f(x) = {}".format(gbest))
+
+	print("#######")
+	print("mean of runs = {}".format(statistics.mean(run_bests)))
+	print("standard deviation of runs = {}".format(statistics.stdev(run_bests)))
+	print("runtime of algorithm = {}".format(time.time()-t0))
+	print("#######")
